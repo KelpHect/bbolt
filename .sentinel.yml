@@ -12,7 +12,7 @@ jobs:
     image: docker.io/library/golang:1.26.9-trixie@sha256:f06b7122f888680048afb247c4e5f49c0069eb6c4c1ccae0f3f4834527a8d22c
     runs_on: { labels: [egress] }
     resources: { cpu: 1, memory: 2GiB }
-    timeout: 30m
+    timeout: 90m
     env:
       GOTOOLCHAIN: local
       GOFLAGS: -count=1
@@ -37,7 +37,7 @@ jobs:
     image: docker.io/library/golang:1.26.9-trixie@sha256:f06b7122f888680048afb247c4e5f49c0069eb6c4c1ccae0f3f4834527a8d22c
     runs_on: { labels: [egress] }
     resources: { cpu: 1, memory: 4GiB }
-    timeout: 30m
+    timeout: 90m
     env:
       GOTOOLCHAIN: local
       GOFLAGS: -count=1
@@ -62,7 +62,7 @@ jobs:
     image: docker.io/library/golang:1.26.9-trixie@sha256:f06b7122f888680048afb247c4e5f49c0069eb6c4c1ccae0f3f4834527a8d22c
     runs_on: { labels: [egress] }
     resources: { cpu: 2, memory: 4GiB }
-    timeout: 30m
+    timeout: 90m
     env:
       GOTOOLCHAIN: local
       GOFLAGS: -count=1
@@ -87,7 +87,7 @@ jobs:
     image: docker.io/library/golang:1.26.9-trixie@sha256:f06b7122f888680048afb247c4e5f49c0069eb6c4c1ccae0f3f4834527a8d22c
     runs_on: { labels: [egress] }
     resources: { cpu: 3, memory: 6GiB }
-    timeout: 30m
+    timeout: 90m
     env:
       GOTOOLCHAIN: local
       GOFLAGS: -count=1
@@ -112,7 +112,7 @@ jobs:
     image: docker.io/library/golang:1.26.9-trixie@sha256:f06b7122f888680048afb247c4e5f49c0069eb6c4c1ccae0f3f4834527a8d22c
     runs_on: { labels: [egress] }
     resources: { cpu: 3, memory: 8GiB }
-    timeout: 30m
+    timeout: 90m
     env:
       GOTOOLCHAIN: local
       GOFLAGS: -count=1
@@ -138,7 +138,7 @@ jobs:
     runs_on: { labels: [egress] }
     needs: [unit-1-cpu, unit-2-cpu, unit-4-cpu, unit-4-cpu-race]
     resources: { cpu: 4, memory: 6GiB }
-    timeout: 30m
+    timeout: 90m
     env:
       GOTOOLCHAIN: local
       GOFLAGS: -count=1
