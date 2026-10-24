@@ -1,0 +1,163 @@
+# KelpHect/bbolt's Sentinel pipeline (B06/B10): the fork's "Tests AMD64"
+# workflow with the same commands. Modules come from proxy.golang.org through a
+# worker the operator granted egress (`runs_on.labels: [egress]`); the module
+# store and build cache are Sentinel caches. GOFLAGS=-count=1 keeps every test
+# fresh; TMPDIR is on the workspace disk because a job's /tmp is a 1 GiB tmpfs.
+# The concurrent jobs share the contract's 10 CPUs and 26 GiB; the unit jobs get
+# 6 GiB because bbolt's tests peak above 4 GiB (a 4 GiB cap was OOM-killed).
+schema: 1
+on:
+  push: {branches: [main]}
+  pull_request: {branches: [main]}
+jobs:
+  fmt:
+    image: docker.io/library/golang:1.26.9-trixie@sha256:f06b7122f888680048afb247c4e5f49c0069eb6c4c1ccae0f3f4834527a8d22c
+    runs_on: { labels: [egress] }
+    resources: { cpu: 1, memory: 1GiB }
+    timeout: 90m
+    env:
+      GOTOOLCHAIN: local
+      GOFLAGS: -count=1
+      GOMODCACHE: /cache/gomod
+      GOCACHE: /cache/gocache
+      GOPATH: /tmp/gopath
+      HOME: /tmp
+      TMPDIR: /workspace/.bench-tmp
+    cache:
+      - name: gomod
+        class: downloads
+        key: "go-mod-${{ hash_files('go.sum') }}"
+        paths: [/cache/gomod]
+      - name: gocache
+        class: compiler
+        key: "go-build-${{ hash_files('go.sum') }}"
+        paths: [/cache/gocache]
+    steps:
+      - id: fmt
+        run: mkdir -p "$TMPDIR" && make fmt
+  unit-1-cpu:
+    image: docker.io/library/golang:1.26.9-trixie@sha256:f06b7122f888680048afb247c4e5f49c0069eb6c4c1ccae0f3f4834527a8d22c
+    runs_on: { labels: [egress] }
+    resources: { cpu: 1, memory: 6GiB }
+    timeout: 90m
+    env:
+      GOTOOLCHAIN: local
+      GOFLAGS: -count=1
+      GOMODCACHE: /cache/gomod
+      GOCACHE: /cache/gocache
+      GOPATH: /tmp/gopath
+      HOME: /tmp
+      TMPDIR: /workspace/.bench-tmp
+    cache:
+      - name: gomod
+        class: downloads
+        key: "go-mod-${{ hash_files('go.sum') }}"
+        paths: [/cache/gomod]
+      - name: gocache
+        class: compiler
+        key: "go-build-${{ hash_files('go.sum') }}"
+        paths: [/cache/gocache]
+    steps:
+      - id: test
+        run: mkdir -p "$TMPDIR" && CPU=1 make test
+  unit-2-cpu:
+    image: docker.io/library/golang:1.26.9-trixie@sha256:f06b7122f888680048afb247c4e5f49c0069eb6c4c1ccae0f3f4834527a8d22c
+    runs_on: { labels: [egress] }
+    resources: { cpu: 2, memory: 6GiB }
+    timeout: 90m
+    env:
+      GOTOOLCHAIN: local
+      GOFLAGS: -count=1
+      GOMODCACHE: /cache/gomod
+      GOCACHE: /cache/gocache
+      GOPATH: /tmp/gopath
+      HOME: /tmp
+      TMPDIR: /workspace/.bench-tmp
+    cache:
+      - name: gomod
+        class: downloads
+        key: "go-mod-${{ hash_files('go.sum') }}"
+        paths: [/cache/gomod]
+      - name: gocache
+        class: compiler
+        key: "go-build-${{ hash_files('go.sum') }}"
+        paths: [/cache/gocache]
+    steps:
+      - id: test
+        run: mkdir -p "$TMPDIR" && CPU=2 make test
+  unit-4-cpu:
+    image: docker.io/library/golang:1.26.9-trixie@sha256:f06b7122f888680048afb247c4e5f49c0069eb6c4c1ccae0f3f4834527a8d22c
+    runs_on: { labels: [egress] }
+    resources: { cpu: 3, memory: 6GiB }
+    timeout: 90m
+    env:
+      GOTOOLCHAIN: local
+      GOFLAGS: -count=1
+      GOMODCACHE: /cache/gomod
+      GOCACHE: /cache/gocache
+      GOPATH: /tmp/gopath
+      HOME: /tmp
+      TMPDIR: /workspace/.bench-tmp
+    cache:
+      - name: gomod
+        class: downloads
+        key: "go-mod-${{ hash_files('go.sum') }}"
+        paths: [/cache/gomod]
+      - name: gocache
+        class: compiler
+        key: "go-build-${{ hash_files('go.sum') }}"
+        paths: [/cache/gocache]
+    steps:
+      - id: test
+        run: mkdir -p "$TMPDIR" && CPU=4 make test
+  unit-4-cpu-race:
+    image: docker.io/library/golang:1.26.9-trixie@sha256:f06b7122f888680048afb247c4e5f49c0069eb6c4c1ccae0f3f4834527a8d22c
+    runs_on: { labels: [egress] }
+    resources: { cpu: 3, memory: 7GiB }
+    timeout: 90m
+    env:
+      GOTOOLCHAIN: local
+      GOFLAGS: -count=1
+      GOMODCACHE: /cache/gomod
+      GOCACHE: /cache/gocache
+      GOPATH: /tmp/gopath
+      HOME: /tmp
+      TMPDIR: /workspace/.bench-tmp
+    cache:
+      - name: gomod
+        class: downloads
+        key: "go-mod-${{ hash_files('go.sum') }}"
+        paths: [/cache/gomod]
+      - name: gocache
+        class: compiler
+        key: "go-build-race-${{ hash_files('go.sum') }}"
+        paths: [/cache/gocache]
+    steps:
+      - id: test
+        run: mkdir -p "$TMPDIR" && CPU=4 ENABLE_RACE=true make test
+  coverage:
+    image: docker.io/library/golang:1.26.9-trixie@sha256:f06b7122f888680048afb247c4e5f49c0069eb6c4c1ccae0f3f4834527a8d22c
+    runs_on: { labels: [egress] }
+    needs: [unit-1-cpu, unit-2-cpu, unit-4-cpu, unit-4-cpu-race]
+    resources: { cpu: 4, memory: 6GiB }
+    timeout: 90m
+    env:
+      GOTOOLCHAIN: local
+      GOFLAGS: -count=1
+      GOMODCACHE: /cache/gomod
+      GOCACHE: /cache/gocache
+      GOPATH: /tmp/gopath
+      HOME: /tmp
+      TMPDIR: /workspace/.bench-tmp
+    cache:
+      - name: gomod
+        class: downloads
+        key: "go-mod-${{ hash_files('go.sum') }}"
+        paths: [/cache/gomod]
+      - name: gocache
+        class: compiler
+        key: "go-build-${{ hash_files('go.sum') }}"
+        paths: [/cache/gocache]
+    steps:
+      - id: coverage
+        run: mkdir -p "$TMPDIR" && make coverage
