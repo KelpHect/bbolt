@@ -3,6 +3,8 @@
 # worker the operator granted egress (`runs_on.labels: [egress]`); the module
 # store and build cache are Sentinel caches. GOFLAGS=-count=1 keeps every test
 # fresh; TMPDIR is on the workspace disk because a job's /tmp is a 1 GiB tmpfs.
+# The concurrent jobs share the contract's 10 CPUs and 26 GiB; the unit jobs get
+# 6 GiB because bbolt's tests peak above 4 GiB (a 4 GiB cap was OOM-killed).
 schema: 1
 on:
   push: {branches: [main]}
@@ -11,7 +13,7 @@ jobs:
   fmt:
     image: docker.io/library/golang:1.26.9-trixie@sha256:f06b7122f888680048afb247c4e5f49c0069eb6c4c1ccae0f3f4834527a8d22c
     runs_on: { labels: [egress] }
-    resources: { cpu: 1, memory: 2GiB }
+    resources: { cpu: 1, memory: 1GiB }
     timeout: 90m
     env:
       GOTOOLCHAIN: local
@@ -36,7 +38,7 @@ jobs:
   unit-1-cpu:
     image: docker.io/library/golang:1.26.9-trixie@sha256:f06b7122f888680048afb247c4e5f49c0069eb6c4c1ccae0f3f4834527a8d22c
     runs_on: { labels: [egress] }
-    resources: { cpu: 1, memory: 4GiB }
+    resources: { cpu: 1, memory: 6GiB }
     timeout: 90m
     env:
       GOTOOLCHAIN: local
@@ -61,7 +63,7 @@ jobs:
   unit-2-cpu:
     image: docker.io/library/golang:1.26.9-trixie@sha256:f06b7122f888680048afb247c4e5f49c0069eb6c4c1ccae0f3f4834527a8d22c
     runs_on: { labels: [egress] }
-    resources: { cpu: 2, memory: 4GiB }
+    resources: { cpu: 2, memory: 6GiB }
     timeout: 90m
     env:
       GOTOOLCHAIN: local
@@ -111,7 +113,7 @@ jobs:
   unit-4-cpu-race:
     image: docker.io/library/golang:1.26.9-trixie@sha256:f06b7122f888680048afb247c4e5f49c0069eb6c4c1ccae0f3f4834527a8d22c
     runs_on: { labels: [egress] }
-    resources: { cpu: 3, memory: 8GiB }
+    resources: { cpu: 3, memory: 7GiB }
     timeout: 90m
     env:
       GOTOOLCHAIN: local
