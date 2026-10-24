@@ -8,14 +8,14 @@ jobs:
   test-linux-amd64-race:
     uses: ./.github/workflows/tests-template.yml
     with:
-      runs-on: ubuntu-latest
+      runs-on: p14-bbolt
       targets: "['linux-unit-test-4-cpu-race']"
 
   coverage:
     needs:
       - test-linux-amd64
       - test-linux-amd64-race
-    runs-on: ubuntu-latest
+    runs-on: p14-bbolt
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - id: goversion

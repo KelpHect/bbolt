@@ -6,7 +6,7 @@ on:
       runs-on:
         required: false
         type: string
-        default: ubuntu-latest
+        default: p14-bbolt
       targets:
         required: false
         type: string
